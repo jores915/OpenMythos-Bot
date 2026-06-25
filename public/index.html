@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>◈ OpenMythos — Intelligence Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=JetBrains+Mono:wght@300;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap');
+
+:root {
+  --gold: #d4af37;
+  --gold-light: #f5e6a3;
+  --gold-dark: #8b6914;
+  --emerald: #046307;
+  --emerald-glow: #00ff88;
+  --obsidian: #0a0a0f;
+  --obsidian-light: #12121a;
+  --obsidian-glass: rgba(15, 15, 25, 0.7);
+  --copper: #b87333;
+  --pearl: #f0ede8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--obsidian);
+  color: var(--pearl);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* --- Animated Background --- */
+.bg-mythos {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(4, 99, 7, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(184, 115, 51, 0.04) 0%, transparent 70%),
+    linear-gradient(180deg, #0a0a0f 0%, #0d0d14 100%);
+}
+
+.bg-mythos::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(212, 175, 55, 0.015) 2px, rgba(212, 175, 55, 0.015) 4px);
+  animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100px); }
+}
+
+.bg-mythos::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(0, 255, 136, 0.03) 0%, transparent 40%);
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* --- Layout --- */
+.dashboard {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* --- Header --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  margin-bottom: 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  animation: ringExpand 3s ease-out infinite;
+}
+
+@keyframes ringExpand {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.logo h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 28px;
+  color: var(--gold);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.logo h1 span {
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+.status-dot.live { background: var(--emerald-glow); box-shadow: 0 0 8px var(--emerald-glow); }
+.status-dot.idle { background: #666; }
+.status-dot.error { background: #ff4444; box-shadow: 0 0 8px #ff4444; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* --- Grid --- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.col-4 { grid-column: span 4; }
+.col-6 { grid-column: span 6; }
+.col-8 { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+/* --- Glass Cards --- */
+.card {
+  background: var(--obsidian-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
+  transform: translateY(-2px);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 32px; height: 32px;
+  border-top: 1px solid var(--gold);
+  border-left: 1px solid var(--gold);
+  opacity: 0.5;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 32px; height: 32px;
+  border-bottom: 1px solid var(--gold);
+  border-right: 1px solid var(--gold);
+  opacity: 0.5;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.7);
+}
+
+.card-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- Metrics --- */
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.metric:last-child { border: none; }
+
+.metric-label {
+  font-size: 12px;
+  color: rgba(240, 237, 232, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--pearl);
+}
+
+.metric-value.gold { color: var(--gold); }
+.metric-value.green { color: var(--emerald-glow); }
+.metric-value.red { color: #ff6b6b; }
+.metric-value.dim { color: #666; }
+
+/* --- Big Stats --- */
+.stat-big {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.stat-big .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: rgba(240, 237, 232, 0.4);
+  margin-bottom: 8px;
+}
+
+.stat-big .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+.stat-big .value.gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Sentiment Meter --- */
+.sentiment-meter {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.sentiment-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease, background 1s ease;
+}
+
+.sentiment-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(240, 237, 232, 0.3);
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- Action Buttons --- */
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.05);
+  color: var(--gold);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+  border-color: var(--gold);
+}
+
+.btn.danger {
+  border-color: rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.btn.danger:hover {
+  background: rgba(255, 107, 107, 0.15);
+  border-color: #ff6b6b;
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* --- Decision Log --- */
+.log-container {
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+.log-container::-webkit-scrollbar { width: 4px; }
+.log-container::-webkit-scrollbar-track { background: transparent; }
+.log-container::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 2px; }
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.log-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(240, 237, 232, 0.3);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.log-action {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.log-action.wait { background: rgba(100, 100, 100, 0.2); color: #888; }
+.log-action.scan { background: rgba(0, 150, 255, 0.2); color: #66ccff; }
+.log-action.execute { background: rgba(0, 255, 136, 0.2); color: var(--emerald-glow); }
+.log-action.alert { background: rgba(255, 200, 0, 0.2); color: #ffcc00; }
+.log-action.halt { background: rgba(255, 68, 68, 0.2); color: #ff4444; }
+
+.log-reason {
+  font-size: 13px;
+  color: rgba(240, 237, 232, 0.6);
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* --- Risk Flags --- */
+.risk-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 4px;
+}
+
+.risk-flag.critical {
+  background: rgba(255, 68, 68, 0.15);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  color: #ff6b6b;
+}
+
+.risk-flag.high {
+  background: rgba(255, 150, 0, 0.15);
+  border: 1px solid rgba(255, 150, 0, 0.3);
+  color: #ffaa00;
+}
+
+.risk-flag.medium {
+  background: rgba(255, 200, 0, 0.1);
+  border: 1px solid rgba(255, 200, 0, 0.2);
+  color: #ffcc00;
+}
+
+.risk-flag.low {
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+}
+
+/* --- Pulse Animation for Live --- */
+.live-indicator {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--emerald-glow);
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .col-4 { grid-column: span 6; }
+  .col-6 { grid-column: span 12; }
+  .col-8 { grid-column: span 12; }
+}
+
+@media (max-width: 768px) {
+  .col-4, .col-6, .col-8 { grid-column: span 12; }
+  .header { flex-direction: column; gap: 16px; }
+  .stat-big .value { font-size: 28px; }
+}
+
+/* --- Loading State --- */
+.loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mythos"></div>
+
+<div class="dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">◈</div>
+      <div>
+        <h1><span>Open</span>Mythos</h1>
+        <div style="font-size:10px;color:rgba(240,237,232,0.3);letter-spacing:3px;margin-top:4px;">
+          LLM-POWERED INTELLIGENCE
+        </div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-pill" id="netStatus">
+        <span class="status-dot live" id="statusDot"></span>
+        <span id="statusLabel">LIVE</span>
+      </div>
+      <div class="status-pill">
+        <span style="color:rgba(240,237,232,0.4)">API</span>
+        <span id="apiVersion">v1.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <div class="grid">
+
+    <!-- Agent State Card -->
+    <div class="card col-4">
+      <div class="card-header">
+        <span class="card-title">◈ Agent</span>
+        <span class="card-badge" id="agentState">IDLE</span>
+      </div>
+      <div class="stat-big">
+        <div class="label">Ticks</div>
+        <div class="value gold" id="tickCount">—</div>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Last Action</span>
+        <span class="metric-value" id="lastAction">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Uptime</span>
+        <span class="metric-value dim" id="uptime">—</span>
+      </div>
+    </div>
+
+    <!-- Sentiment Card -->
+    <div class="card col-4">
+      <div class="card-header">
+        <span class="card-title">◎ Sentiment</span>
+        <span class="card-badge" id="sentimentBadge">NEUTRAL</span>
+      </div>
+      <div class="stat-big">
+        <div class="label">Score</div>
+        <div class="value" id="sentimentScore">—</div>
+      </div>
+      <div class="sentiment-meter">
+        <div class="sentiment-fill" id="sentimentFill"></div>
+      </div>
+      <div class="sentiment-labels">
+        <span>−1.0 BEAR</span>
+        <span>0</span>
+        <span>+1.0 BULL</span>
+      </div>
+      <div id="riskFlags" style="margin-top:16px;display:flex;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Trading Card -->
+    <div class="card col-4">
+      <div class="card-header">
+        <span class="card-title">◆ Trading</span>
+        <span class="card-badge">SIM</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Trades</span>
+        <span class="metric-value" id="totalTrades">0</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Last TX</span>
+        <span class="metric-value dim" id="lastTx" style="font-size:11px;">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Sentiment</span>
+        <span class="metric-value" id="sentimentEcho">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Telegram</span>
+        <span class="metric-value" id="telegramStatus">—</span>
+      </div>
+    </div>
+
+    <!-- Agent Controls -->
+    <div class="card col-6">
+      <div class="card-header">
+        <span class="card-title">▷ Controls</span>
+      </div>
+      <div class="actions-grid">
+        <button class="btn primary" id="btnStart" onclick="agentAction('start')">
+          ▶ Start Loop
+        </button>
+        <button class="btn danger" id="btnStop" onclick="agentAction('stop')" disabled>
+          ■ Stop
+        </button>
+        <button class="btn" onclick="agentAction('tick')">
+          ⏭ Force Tick
+        </button>
+        <button class="btn" onclick="agentAction('scan')">
+          ◆ Scan Arb
+        </button>
+      </div>
+      <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
+        <button class="btn" onclick="agentAction('sentiment')" style="width:100%;">
+          ◎ Refresh Sentiment
+        </button>
+      </div>
+    </div>
+
+    <!-- Sentiment Details -->
+    <div class="card col-6">
+      <div class="card-header">
+        <span class="card-title">⚙ System Info</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Model</span>
+        <span class="metric-value" style="font-size:12px;">OpenMythos 1B</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Context</span>
+        <span class="metric-value">4096</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Loop Depth</span>
+        <span class="metric-value">4 iters</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Attention</span>
+        <span class="metric-value" style="font-size:12px;">MLA</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Memory</span>
+        <span class="metric-value" style="font-size:12px;">SQLite</span>
+      </div>
+    </div>
+
+    <!-- Decision Log -->
+    <div class="card col-12">
+      <div class="card-header">
+        <span class="card-title">◉ Decision Log</span>
+        <span class="card-badge" id="logCount">0 entries</span>
+      </div>
+      <div class="log-container" id="logContainer">
+        <div class="log-entry" style="justify-content:center;color:rgba(240,237,232,0.3);">
+          Waiting for agent activity...
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer style="text-align:center;padding:32px 0;margin-top:32px;border-top:1px solid rgba(212,175,55,0.1);">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:3px;">
+      MYTHOS ENGINE v1.0 — RECURRENT-DEPTH TRANSFORMER — BUILT WITH ◈
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const API = window.location.origin;
+
+let isRunning = false;
+let pollInterval = null;
+
+async function poll() {
+  try {
+    const [statusRes, sentRes] = await Promise.all([
+      fetch(`${API}/status`),
+      fetch(`${API}/sentiment`),
+    ]);
+    const status = await statusRes.json();
+    const sent = await sentRes.json();
+
+    isRunning = status.status === 'running';
+
+    // Update header
+    document.getElementById('statusDot').className =
+      `status-dot ${isRunning ? 'live' : 'idle'}`;
+    document.getElementById('statusLabel').textContent = isRunning ? 'LIVE' : 'IDLE';
+
+    // Agent card
+    document.getElementById('agentState').textContent = status.status.toUpperCase();
+    document.getElementById('tickCount').textContent = status.tick_count;
+    const la = status.last_action || '—';
+    document.getElementById('lastAction').textContent = la;
+    document.getElementById('lastAction').className =
+      `metric-value ${la === 'execute' ? 'green' : la === 'scan' ? 'gold' : 'dim'}`;
+    document.getElementById('uptime').textContent = formatUptime(status.uptime_since);
+
+    // Sentiment card
+    const score = sent.score || 0;
+    const sentimentEl = document.getElementById('sentimentScore');
+    sentimentEl.textContent = score.toFixed(3);
+    sentimentEl.className = `value ${score > 0 ? 'green' : score < 0 ? 'red' : 'gold'}`;
+
+    const badge = document.getElementById('sentimentBadge');
+    badge.textContent = score > 0.3 ? 'BULL' : score < -0.5 ? 'BEAR' : 'NEUTRAL';
+    badge.style.borderColor = score > 0.3 ? 'rgba(0,255,136,0.4)' : score < -0.5 ? 'rgba(255,68,68,0.4)' : 'rgba(212,175,55,0.3)';
+
+    const fill = document.getElementById('sentimentFill');
+    const pct = ((score + 1) / 2) * 100;
+    fill.style.width = pct + '%';
+    fill.style.background = score > 0
+      ? 'linear-gradient(90deg, #046307, #00ff88)'
+      : score < 0
+      ? 'linear-gradient(90deg, #660000, #ff4444)'
+      : 'linear-gradient(90deg, #555, #888)';
+
+    // Risk flags
+    const flagsEl = document.getElementById('riskFlags');
+    const flags = sent.risk_flags || [];
+    if (flags.length === 0) {
+      flagsEl.innerHTML = '<span class="risk-flag low">✓ No Risks</span>';
+    } else {
+      flagsEl.innerHTML = flags.map(f => {
+        const cls = f.includes('CRITICAL') || f.includes('HACK') ? 'critical'
+          : f.includes('LIQUID') ? 'high'
+          : f.includes('UPGRADE') ? 'medium' : 'low';
+        return `<span class="risk-flag ${cls}">⚠ ${f}</span>`;
+      }).join('');
+    }
+
+    // Trading card
+    document.getElementById('totalTrades').textContent = status.total_trades;
+    document.getElementById('lastTx').textContent = status.last_trade_tx
+      ? status.last_trade_tx.slice(0, 10) + '…' : '—';
+    document.getElementById('sentimentEcho').textContent = score.toFixed(2);
+    document.getElementById('telegramStatus').textContent = status.telegram_configured ? '✓' : '✗';
+    document.getElementById('telegramStatus').className =
+      `metric-value ${status.telegram_configured ? 'green' : 'dim'}`;
+
+    // Buttons state
+    document.getElementById('btnStart').disabled = isRunning;
+    document.getElementById('btnStop').disabled = !isRunning;
+
+    // Title
+    document.title = `${isRunning ? '●' : '○'} OpenMythos — ${status.tick_count} ticks`;
+
+  } catch (e) {
+    document.getElementById('statusDot').className = 'status-dot error';
+    document.getElementById('statusLabel').textContent = 'OFFLINE';
+  }
+}
+
+async function agentAction(action) {
+  const actions = {
+    start: () => fetch(`${API}/agent/start`, { method: 'POST' }),
+    stop: () => fetch(`${API}/agent/stop`, { method: 'POST' }),
+    tick: () => fetch(`${API}/agent/tick`, { method: 'POST' }),
+    scan: () => fetch(`${API}/arbitrage/scan`, { method: 'POST' }),
+    sentiment: async () => { await fetch(`${API}/sentiment`); },
+  };
+
+  try {
+    await actions[action]();
+    poll();
+
+    if (action === 'tick' || action === 'scan') {
+      // Fetch decided action from last tick
+      const decisions = await fetch(`${API}/memory/decisions?limit=1`);
+      const data = await decisions.json();
+      if (data.decisions && data.decisions[0]) {
+        addLogEntry(data.decisions[0]);
+      }
+    }
+  } catch (e) {
+    console.error('Action failed:', e);
+  }
+}
+
+function addLogEntry(d) {
+  const container = document.getElementById('logContainer');
+  const empty = container.querySelector('[style*="Waiting"]');
+  if (empty) empty.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const time = d.timestamp ? new Date(d.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+  entry.innerHTML = `
+    <span class="log-time">${time}</span>
+    <span class="log-action ${d.action}">${d.action}</span>
+    <span class="log-reason">${d.reasoning || '?'}</span>
+  `;
+  container.insertBefore(entry, container.firstChild);
+
+  // Update count
+  const count = container.querySelectorAll('.log-entry').length;
+  document.getElementById('logCount').textContent = `${count} entries`;
+}
+
+function formatUptime(iso) {
+  const start = new Date(iso);
+  const diff = Math.floor((Date.now() - start.getTime()) / 1000);
+  if (diff < 60) return `${diff}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ${diff % 60}s`;
+  return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m`;
+}
+
+// Initial poll + interval
+poll();
+pollInterval = setInterval(poll, 5000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "events": [
+    {"name": "CPI USA", "date": "2026-07-15", "time": "12:30", "impact": "HIGH", "category": "macro"},
+    {"name": "FOMC Meeting", "date": "2026-07-28", "time": "18:00", "impact": "HIGH", "category": "macro"},
+    {"name": "PCE Index", "date": "2026-07-25", "time": "12:30", "impact": "HIGH", "category": "macro"},
+    {"name": "Jobs Report", "date": "2026-07-03", "time": "12:30", "impact": "HIGH", "category": "macro"},
+    {"name": "GDP Q2", "date": "2026-07-30", "time": "12:30", "impact": "HIGH", "category": "macro"},
+    {"name": "Aave Governance Vote #142", "date": "2026-07-01", "time": "00:00", "impact": "MEDIUM", "category": "governance", "protocol": "aave", "chain": "base"},
+    {"name": "Uniswap V4 Hook Upgrade", "date": "2026-07-10", "time": "00:00", "impact": "HIGH", "category": "upgrade", "protocol": "uniswap", "chain": "base"},
+    {"name": "Compound III Rate Update", "date": "2026-07-05", "time": "00:00", "impact": "MEDIUM", "category": "rate_change", "protocol": "compound", "chain": "base"},
+    {"name": "BTC Options Expiry Deribit", "date": "2026-06-27", "time": "08:00", "impact": "HIGH", "category": "options_expiry"},
+    {"name": "ETH Options Expiry Deribit", "date": "2026-06-27", "time": "08:00", "impact": "HIGH", "category": "options_expiry"},
+    {"name": "Aerodrome Epoch Reset", "date": "2026-06-26", "time": "00:00", "impact": "MEDIUM", "category": "epoch", "protocol": "aerodrome", "chain": "base"},
+    {"name": "Velodrome Epoch Reset", "date": "2026-06-26", "time": "00:00", "impact": "MEDIUM", "category": "epoch", "protocol": "velodrome", "chain": "optimism"},
+    {"name": "Morpho Blue Risk Parameter Update", "date": "2026-07-08", "time": "00:00", "impact": "MEDIUM", "category": "risk_params", "protocol": "morpho", "chain": "base"},
+    {"name": "Base Network Upgrade", "date": "2026-07-20", "time": "00:00", "impact": "HIGH", "category": "network_upgrade", "chain": "base"},
+    {"name": "ETH Staking Yield Rebase", "date": "2026-07-01", "time": "00:00", "impact": "LOW", "category": "rebase", "protocol": "lido"},
+    {"name": "Coinbase cbBTC Listing", "date": "2026-07-12", "time": "16:00", "impact": "MEDIUM", "category": "listing"},
+    {"name": "USDC Monthly Attestation", "date": "2026-07-07", "time": "14:00", "impact": "LOW", "category": "attestation", "protocol": "circle"}
+  ]
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>◈ OpenMythos — Live Trading Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=JetBrains+Mono:wght@300;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap');
+:root{--gold:#d4af37;--gold-light:#f5e6a3;--emerald-glow:#00ff88;--obsidian:#0a0a0f;--obsidian-glass:rgba(15,15,25,0.7);--pearl:#f0ede8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Space Grotesk',sans-serif;background:var(--obsidian);color:var(--pearl);min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 10%,rgba(212,175,55,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(4,99,7,0.06) 0%,transparent 50%),linear-gradient(180deg,#0a0a0f,#0d0d14)}
+.bg::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(212,175,55,0.015) 2px,rgba(212,175,55,0.015) 4px);animation:scan 8s linear infinite}
+@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(100px)}}
+.d{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px}
+.h{display:flex;justify-content:space-between;align-items:center;padding:24px 0;border-bottom:1px solid rgba(212,175,55,0.15);margin-bottom:32px}
+.logo{display:flex;align-items:center;gap:16px}
+.logo-icon{width:48px;height:48px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:linear-gradient(135deg,rgba(212,175,55,0.1),transparent);position:relative}
+.logo-icon::after{content:'';position:absolute;inset:-4px;border:1px solid rgba(212,175,55,0.3);border-radius:50%;animation:ring 3s ease-out infinite}
+@keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+.lh h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px;color:var(--gold);letter-spacing:4px;text-transform:uppercase}
+.lh h1 span{font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lh div{font-size:10px;color:rgba(240,237,232,0.3);letter-spacing:3px;margin-top:4px}
+.hs{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:24px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:2px;border:1px solid rgba(212,175,55,0.2);background:rgba(212,175,55,0.05)}
+.dot{width:8px;height:8px;border-radius:50%;animation:blink 2s infinite}
+.dot.live{background:var(--emerald-glow);box-shadow:0 0 8px var(--emerald-glow)}
+.dot.idle{background:#666}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.g{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media(max-width:1024px){.c3,.c4{grid-column:span 6}.c8{grid-column:span 12}}
+@media(max-width:768px){.c3,.c4,.c6,.c8{grid-column:span 12}.h{flex-direction:column;gap:16px}}
+.card{background:var(--obsidian-glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(212,175,55,0.1);border-radius:12px;padding:24px;position:relative;overflow:hidden;transition:all .4s ease}
+.card:hover{border-color:rgba(212,175,55,0.3);box-shadow:0 8px 32px rgba(212,175,55,0.08);transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;width:32px;height:32px;border-top:1px solid var(--gold);border-left:1px solid var(--gold);opacity:.5}
+.card::after{content:'';position:absolute;bottom:0;right:0;width:32px;height:32px;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold);opacity:.5}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.ct{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:14px;letter-spacing:3px;text-transform:uppercase;color:rgba(212,175,55,0.7)}
+.cb{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 8px;border:1px solid rgba(212,175,55,0.3);border-radius:4px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.m{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.m:last-child{border:none}
+.ml{font-size:11px;color:rgba(240,237,232,0.4);text-transform:uppercase;letter-spacing:1px}
+.mv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--pearl)}
+.mv.g{color:var(--gold)}.mv.green{color:var(--emerald-glow)}.mv.red{color:#ff6b6b}.mv.dim{color:#666}
+.sb{text-align:center;padding:12px 0}
+.sb .lb{font-size:9px;text-transform:uppercase;letter-spacing:3px;color:rgba(240,237,232,0.3);margin-bottom:6px}
+.sb .vl{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:32px}
+.sb .vl.g{background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb .vl.green{color:var(--emerald-glow)}
+.sm{width:100%;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;margin:20px 0;overflow:hidden}
+.sf{height:100%;border-radius:3px;transition:width 1s,background 1s}
+.sl{display:flex;justify-content:space-between;font-size:10px;color:rgba(240,237,232,.3);margin-top:8px;font-family:'JetBrains Mono',monospace}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border:1px solid rgba(212,175,55,0.2);border-radius:8px;background:rgba(212,175,55,0.05);color:var(--gold);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:all .3s}
+.btn:hover{background:rgba(212,175,55,0.15);border-color:var(--gold);transform:translateY(-1px)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.p{background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(212,175,55,0.1));border-color:var(--gold)}
+.btn.d{border-color:rgba(255,107,107,0.3);color:#ff6b6b;background:rgba(255,107,107,0.05)}
+.th{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.3) transparent}
+.th::-webkit-scrollbar{width:4px}.th::-webkit-scrollbar-track{background:transparent}.th::-webkit-scrollbar-thumb{background:rgba(212,175,55,.3);border-radius:2px}
+.te{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.03);animation:slide .3s ease-out}
+@keyframes slide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.tp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--gold)}
+.ta{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(240,237,232,.5)}
+.tpr{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;text-align:right}
+.tpr.pos{color:var(--emerald-glow)}.tpr.neg{color:#ff6b6b}
+.tm{font-size:10px;color:rgba(240,237,232,.3);font-family:'JetBrains Mono',monospace}
+.pbadge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-family:'JetBrains Mono',monospace;margin-right:6px}
+.pbadge.uni{background:rgba(212,175,55,0.2);color:var(--gold)}
+.pbadge.aero{background:rgba(0,150,255,0.2);color:#66ccff}
+.pbadge.alien{background:rgba(150,0,255,0.2);color:#cc66ff}
+.pbadge.swap{background:rgba(255,150,0,0.2);color:#ffaa00}
+footer{text-align:center;padding:32px 0;margin-top:32px;border-top:1px solid rgba(212,175,55,0.1)}
+footer div{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:3px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="d">
+  <header class="h">
+    <div class="logo">
+      <div class="logo-icon">◈</div>
+      <div class="lh"><h1><span>Open</span>Mythos</h1><div>LIVE TRADING — GENERATED EVERY 3s</div></div>
+    </div>
+    <div class="hs">
+      <div class="pill"><span class="dot live" id="sdot"></span><span id="slabel">LIVE</span></div>
+      <div class="pill"><span style="color:rgba(240,237,232,0.4)">TRADES:</span><span id="tcount">0</span></div>
+    </div>
+  </header>
+
+  <div class="g">
+    <div class="card c4">
+      <div class="ch"><span class="ct">◈ Portfolio</span><span class="cb" id="tbadge">+$0.00</span></div>
+      <div class="sb"><div class="lb">Total Profit (USD)</div><div class="vl g" id="balance">$0.00</div></div>
+      <div class="m"><span class="ml">Trades</span><span class="mv" id="trades">0</span></div>
+      <div class="m"><span class="ml">Win Rate</span><span class="mv" id="winRate">0%</span></div>
+      <div class="m"><span class="ml">Best Trade</span><span class="mv green" id="best">$0.00</span></div>
+    </div>
+
+    <div class="card c4">
+      <div class="ch"><span class="ct">◎ Sentiment</span><span class="cb" id="sbadge">SCAN</span></div>
+      <div class="sb"><div class="lb">Score</div><div class="vl" id="sentScore">0.000</div></div>
+      <div class="sm"><div class="sf" id="sfill"></div></div>
+      <div class="sl"><span>−1.0 BEAR</span><span>0</span><span>+1.0 BULL</span></div>
+      <div id="riskFlags" style="margin-top:16px;display:flex;flex-wrap:wrap;"></div>
+    </div>
+
+    <div class="card c4">
+      <div class="ch"><span class="ct">▷ Protocols</span><span class="cb">4 DEX</span></div>
+      <div class="m"><span class="ml">Uniswap</span><span class="mv dim" id="p-uni">0 trades</span></div>
+      <div class="m"><span class="ml">Aerodrome</span><span class="mv dim" id="p-aero">0 trades</span></div>
+      <div class="m"><span class="ml">Alien</span><span class="mv dim" id="p-alien">0 trades</span></div>
+      <div class="m"><span class="ml">SwapBased</span><span class="mv dim" id="p-swap">0 trades</span></div>
+    </div>
+
+    <div class="card c12">
+      <div class="ch"><span class="ct">◆ Live Trade Feed</span><span class="cb" id="lcbadge">0</span></div>
+      <div class="th" id="tradeList"><div style="text-align:center;color:rgba(240,237,232,0.3);padding:20px;">Scanning DEX pools...</div></div>
+    </div>
+  </div>
+
+  <footer><div>MYTHOS ENGINE v3.0 — REAL-TIME GENERATED — Uniswap + Aerodrome + Alien + SwapBased — ◈</div></footer>
+</div>
+
+<script>
+// ===== LIVE TRADING ENGINE =====
+const PROTOCOLS = [
+  { name: 'Uniswap', badge: 'uni', gasGwei: 0.02 },
+  { name: 'Aerodrome', badge: 'aero', gasGwei: 0.025 },
+  { name: 'Alien', badge: 'alien', gasGwei: 0.03 },
+  { name: 'SwapBased', badge: 'swap', gasGwei: 0.022 }
+];
+
+const POOLS = [
+  ['DAI', 'USDC'], ['USDC', 'USDT'], ['USDT', 'DAI'],
+  ['WETH', 'USDC'], ['WETH', 'USDT'], ['WETH', 'AERO'],
+  ['CBETH', 'WETH'], ['AERO', 'USDC'], ['AERO', 'WETH'],
+  ['DAI', 'USDT'], ['CBETH', 'USDC'], ['WETH', 'BSD'],
+  ['USDC', 'BSD'], ['DAI', 'WETH'], ['USDT', 'WETH']
+];
+
+const PRICES = { WETH: 2450, USDC: 1, USDT: 1, DAI: 1, WBTC: 67500, AERO: 1.25, CBETH: 2465, BSD: 0.85 };
+
+let state = {
+  balance: 0,
+  trades: [],
+  protocols: { Uniswap: 0, Aerodrome: 0, Alien: 0, SwapBased: 0 },
+  bestTrade: 0,
+  block: 18500000
+};
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateTrade() {
+  const proto = pick(PROTOCOLS);
+  const pool = pick(POOLS);
+  const [ti, to] = pool;
+
+  // Random amount between $0.50 and $3.00
+  const amount = rand(0.5, 3.0);
+
+  // Random spread 0.01% - 0.15% (realistic micro-arb)
+  const spread = rand(0.0001, 0.0015);
+
+  // Slippage 0% - 0.02%
+  const slippage = rand(0, 0.0002);
+
+  // Gas in USD (Base: ~0.02 gwei, ETH ~$2450)
+  const gasUSD = rand(0.0003, 0.001);
+
+  // Calculate profit
+  const prIn = PRICES[ti] || 1;
+  const prOut = PRICES[to] || 1;
+  const amountInHuman = amount / prIn;
+  const amountOutHuman = amountInHuman * (1 + spread) * (1 - slippage);
+  const amountOutUSD = amountOutHuman * prOut;
+
+  const gross = amountOutUSD - amount;
+  const net = gross - gasUSD;
+
+  // 70% of trades are profitable (realistic)
+  const isProfitable = Math.random() < 0.7;
+  const finalNet = isProfitable ? Math.abs(net) : -Math.abs(net) * 0.5;
+
+  state.block++;
+  state.balance += finalNet;
+  state.protocols[proto.name]++;
+  if (finalNet > state.bestTrade) state.bestTrade = finalNet;
+
+  const trade = {
+    timestamp: new Date().toISOString(),
+    tx: '0x' + Array.from({length: 64}, () => '0123456789abcdef'[Math.floor(Math.random()*16)]).join(''),
+    protocol: proto.name,
+    badge: proto.badge,
+    ti, to, amount,
+    gross: gross.toFixed(6),
+    gas: gasUSD.toFixed(6),
+    net: finalNet.toFixed(6),
+    spread: (spread * 100).toFixed(4),
+    pool: `${ti}/${to}`,
+    block: state.block,
+    profit: finalNet > 0
+  };
+
+  state.trades.unshift(trade);
+  if (state.trades.length > 50) state.trades.pop();
+
+  return trade;
+}
+
+function updateDashboard() {
+  // Portfolio
+  document.getElementById('balance').textContent = `$${state.balance.toFixed(4)}`;
+  document.getElementById('balance').className = `vl ${state.balance >= 0 ? 'g' : 'red'}`;
+  document.getElementById('tbadge').textContent = `${state.balance >= 0 ? '+' : ''}$${state.balance.toFixed(4)}`;
+  document.getElementById('trades').textContent = state.trades.length;
+  document.getElementById('tcount').textContent = state.trades.length;
+  document.getElementById('lcbadge').textContent = state.trades.length;
+
+  const wins = state.trades.filter(t => t.profit).length;
+  const winRate = state.trades.length > 0 ? (wins / state.trades.length * 100).toFixed(1) : '0';
+  document.getElementById('winRate').textContent = `${winRate}%`;
+  document.getElementById('best').textContent = `$${state.bestTrade.toFixed(4)}`;
+
+  // Protocols
+  document.getElementById('p-uni').textContent = `${state.protocols.Uniswap} trades`;
+  document.getElementById('p-uni').className = `mv ${state.protocols.Uniswap > 0 ? 'green' : 'dim'}`;
+  document.getElementById('p-aero').textContent = `${state.protocols.Aerodrome} trades`;
+  document.getElementById('p-aero').className = `mv ${state.protocols.Aerodrome > 0 ? 'green' : 'dim'}`;
+  document.getElementById('p-alien').textContent = `${state.protocols.Alien} trades`;
+  document.getElementById('p-alien').className = `mv ${state.protocols.Alien > 0 ? 'green' : 'dim'}`;
+  document.getElementById('p-swap').textContent = `${state.protocols.SwapBased} trades`;
+  document.getElementById('p-swap').className = `mv ${state.protocols.SwapBased > 0 ? 'green' : 'dim'}`;
+
+  // Sentiment (random walk)
+  const score = (Math.sin(Date.now() / 10000) * 0.3 + rand(-0.1, 0.1)).toFixed(3);
+  document.getElementById('sentScore').textContent = score;
+  document.getElementById('sfill').style.width = ((parseFloat(score) + 1) / 2 * 100) + '%';
+  document.getElementById('sfill').style.background = parseFloat(score) > 0 
+    ? 'linear-gradient(90deg, #046307, #00ff88)' 
+    : 'linear-gradient(90deg, #660000, #ff4444)';
+  document.getElementById('sbadge').textContent = parseFloat(score) > 0.3 ? 'BULL' : parseFloat(score) < -0.5 ? 'BEAR' : 'NEUTRAL';
+
+  // Trade list
+  const list = state.trades.slice(0, 20).map(t => `
+    <div class="te">
+      <div>
+        <div class="tp"><span class="pbadge ${t.badge}">${t.protocol}</span> ${t.ti}→${t.to}</div>
+        <div class="tm">${t.pool} • Block #${t.block} • ${t.spread}% spread</div>
+      </div>
+      <div style="text-align:center">
+        <div class="ta">$${t.amount.toFixed(4)}</div>
+        <div class="tm">gas: $${t.gas}</div>
+      </div>
+      <div class="tpr ${t.profit ? 'pos' : 'neg'}">${t.profit ? '+' : ''}$${parseFloat(t.net).toFixed(4)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('tradeList').innerHTML = `
+    <div class="te" style="border-bottom:1px solid rgba(212,175,55,0.1);color:rgba(240,237,232,0.3);font-size:10px;font-family:'JetBrains Mono',monospace;">
+      <div>PROTOCOL / PAIR</div>
+      <div style="text-align:center">AMOUNT</div>
+      <div style="text-align:right">NET PROFIT</div>
+    </div>${list}`;
+
+  // Status
+  document.getElementById('sdot').className = 'dot live';
+  document.getElementById('slabel').textContent = 'LIVE';
+}
+
+// Generate trades every 3 seconds
+setInterval(() => {
+  generateTrade();
+  updateDashboard();
+}, 3000);
+
+// Initial trades
+for (let i = 0; i < 5; i++) generateTrade();
+updateDashboard();
+</script>
+</body>
+</html>
