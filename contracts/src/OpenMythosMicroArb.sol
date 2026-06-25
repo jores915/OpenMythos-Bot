@@ -50,7 +50,7 @@ contract OpenMythosMicroArb {
         _;
     }
 
-    /// @notice Execute a micro-arbitrage: swap tokenIn -> tokenOut -> tokenIn on same pool
+    /// @notice Execute a micro-arbitrage: swap tokenIn -> tokenMid -> tokenIn on same pool
     /// @param tokenIn The token to start with
     /// @param tokenMid The intermediate token to swap through
     /// @param amountIn The amount of tokenIn to trade
@@ -66,7 +66,7 @@ contract OpenMythosMicroArb {
         uint256 minProfit
     ) external onlyOwner returns (bool) {
         // Step 1: Pull tokens from owner
-        IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
+        require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn), "TransferFrom failed");
 
         // Step 2: Swap tokenIn -> tokenMid
         IERC20(tokenIn).approve(address(router), amountIn);
@@ -84,7 +84,7 @@ contract OpenMythosMicroArb {
         } catch Error(string memory reason) {
             emit TradeFailed(tokenIn, tokenMid, amountIn, reason, block.timestamp);
             // Refund
-            IERC20(tokenIn).transfer(msg.sender, amountIn);
+            require(IERC20(tokenIn).transfer(msg.sender, amountIn), "Refund failed");
             return false;
         }
 
@@ -104,7 +104,7 @@ contract OpenMythosMicroArb {
         } catch Error(string memory reason) {
             emit TradeFailed(tokenIn, tokenMid, amountIn, reason, block.timestamp);
             // Refund tokenMid
-            IERC20(tokenMid).transfer(msg.sender, amountMid);
+            require(IERC20(tokenMid).transfer(msg.sender, amountMid), "Refund mid failed");
             return false;
         }
 
@@ -112,7 +112,7 @@ contract OpenMythosMicroArb {
         if (amountOut <= amountIn) {
             emit TradeFailed(tokenIn, tokenMid, amountIn, "Not profitable", block.timestamp);
             // Send back whatever we got
-            IERC20(tokenIn).transfer(msg.sender, amountOut);
+            require(IERC20(tokenIn).transfer(msg.sender, amountOut), "Return failed");
             return false;
         }
 
@@ -120,12 +120,12 @@ contract OpenMythosMicroArb {
 
         if (profit < minProfit) {
             emit TradeFailed(tokenIn, tokenMid, amountIn, "Profit below min", block.timestamp);
-            IERC20(tokenIn).transfer(msg.sender, amountOut);
+            require(IERC20(tokenIn).transfer(msg.sender, amountOut), "Return below min failed");
             return false;
         }
 
         // Step 5: Send profit + original to owner
-        IERC20(tokenIn).transfer(msg.sender, amountOut);
+        require(IERC20(tokenIn).transfer(msg.sender, amountOut), "Payout failed");
 
         emit TradeExecuted(tokenIn, tokenMid, amountIn, amountOut, profit, block.timestamp);
         return true;
@@ -134,7 +134,7 @@ contract OpenMythosMicroArb {
     /// @notice Withdraw any accumulated tokens
     function withdraw(address token) external onlyOwner {
         uint256 bal = IERC20(token).balanceOf(address(this));
-        if (bal > 0) IERC20(token).transfer(owner, bal);
+        if (bal > 0) require(IERC20(token).transfer(owner, bal), "Withdraw failed");
     }
 
     /// @notice Withdraw ETH
